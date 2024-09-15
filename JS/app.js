@@ -1,51 +1,27 @@
+// Array de productos (inventario) inicializado desde localStorage o vacío
+let inventario = JSON.parse(localStorage.getItem('inventario')) || [];
+
 // Función para validar si el usuario es "admin"
 function validarUsuario() {
     let user = prompt("Por favor, ingrese el usuario:");
     if (user === "admin") {
         alert("Bienvenido Administrador");
-        menuPrincipal(); // Si es admin, inicia el menú principal
+        cargarContenido(); // Si es admin, carga el contenido
     } else {
-        alert("Usuario de Administrador incorrecto");
+        alert("Usuario de Administrador incorrecto. No tiene acceso.");
+        document.body.innerHTML = ''; // Borra el contenido de la página si no es admin
     }
 }
 
-// Menú principal para navegar entre funciones
-function menuPrincipal() {
-    let opcion = prompt(`Elija una opción:
-    1. Agregar Producto
-    2. Modificar Producto
-    3. Buscar Producto por Usuario
-    4. Eliminar producto
-    5. Exportar Datos
-    6. Salir`);
-
-    switch (opcion) {
-        case "1":
-            agregarProducto();
-            break;
-        case "2":
-            modificarProducto();
-            break;
-        case "3":
-            buscarProductoPorUsuario();
-            break;
-        case "4":
-            eliminarProducto();
-            break;
-        case "5":
-            exportarDatos();
-            break;
-        case "6":
-            alert("Saliendo del sistema...");
-            break;
-        default:
-            alert("Opción no válida.");
-            menuPrincipal();
-    }
+// Función para cargar el contenido solo si es admin
+function cargarContenido() {
+    document.getElementById('contenido').style.display = 'block';
 }
 
-// Array de productos 
-let inventario = [];
+// Función para guardar el inventario en localStorage
+function guardarInventarioEnLocalStorage() {
+    localStorage.setItem('inventario', JSON.stringify(inventario));
+}
 
 // Función para agregar productos
 function agregarProducto() {
@@ -64,7 +40,6 @@ function agregarProducto() {
     let productoExistente = inventario.find(producto => producto.serie === serie);
     if (productoExistente) {
         alert("Ya existe un producto con ese número de serie.");
-        menuPrincipal();
         return; // Sale de la función si ya existe un producto con el mismo número de serie
     }
 
@@ -88,8 +63,8 @@ function agregarProducto() {
     };
 
     inventario.push(nuevoProducto);
+    guardarInventarioEnLocalStorage(); // Guardar en localStorage
     alert("Producto agregado correctamente:\n" + mostrarProducto(nuevoProducto));
-    menuPrincipal();
 }
 
 // Función para modificar productos
@@ -109,10 +84,10 @@ function modificarProducto() {
         productoEncontrado.uso = prompt("Ingrese el nuevo uso:", productoEncontrado.uso);
 
         alert("Producto modificado correctamente: " + mostrarProducto(productoEncontrado));
+        guardarInventarioEnLocalStorage(); // Actualizar localStorage
     } else {
         alert("Producto no encontrado.");
     }
-    menuPrincipal();
 }
 
 // Función para buscar productos por usuario
@@ -129,7 +104,6 @@ function buscarProductoPorUsuario() {
     } else {
         alert("No se encontraron productos para el usuario: " + usuarioBuscado);
     }
-    menuPrincipal();
 }
 
 // Función auxiliar para obtener el nombre del producto basado en el número de caso
@@ -164,19 +138,34 @@ function eliminarProducto() {
         alert("Producto eliminado correctamente: " + mostrarProducto(productoEncontrado));
         // Filtra el inventario para eliminar el producto con el número de serie ingresado
         inventario = inventario.filter(producto => producto.serie !== buscarSerie);
+        guardarInventarioEnLocalStorage(); // Actualizar localStorage
     } else {
         alert("Producto no encontrado.");
     }
-    menuPrincipal();
 }
 
-
-// Función para exportar datos
+// Función para exportar datos (simulación)
 function exportarDatos() {
     let fecha = prompt("Elija la fecha desde cuando desea descargar un reporte (Formato: DD-MM-AAAA):");
     alert("Datos exportados desde la fecha: " + fecha);
-    menuPrincipal();
 }
 
-// Ejecuta la validación del usuario al inicio
-validarUsuario();
+// Función para cerrar la página al presionar "Salir"
+function salirDelSistema() {
+    alert("Saliendo del sistema...");
+    window.close(); // Intenta cerrar la pestaña
+}
+
+// Oculta el contenido inicialmente
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('contenido').style.display = 'none';
+    validarUsuario(); // Ejecuta la validación del usuario al inicio
+});
+
+// Eventos para los botones
+document.getElementById('agregarProducto').addEventListener('click', agregarProducto);
+document.getElementById('modificarProducto').addEventListener('click', modificarProducto);
+document.getElementById('buscarProducto').addEventListener('click', buscarProductoPorUsuario);
+document.getElementById('eliminarProducto').addEventListener('click', eliminarProducto);
+document.getElementById('exportarDatos').addEventListener('click', exportarDatos);
+document.getElementById('salirSistema').addEventListener('click', salirDelSistema);
